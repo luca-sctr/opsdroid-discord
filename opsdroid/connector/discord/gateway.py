@@ -107,6 +107,7 @@ class GatewayConnection(object):
         await self.send(identity)
     
     async def closeWebsocket(self):
+        _LOGGER.warning("closing Gateway")
         await self.send({"close"})
         self.ping_task.cancel()
         self.send_task.cancel()
