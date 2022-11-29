@@ -15,6 +15,7 @@ CONFIG_SCHEMA = {
 }
 
 
+
 class ConnectorDiscord(Connector):
     def __init__(self, config, opsdroid=None):
         """Connector Setup."""

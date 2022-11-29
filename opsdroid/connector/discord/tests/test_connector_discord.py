@@ -18,23 +18,24 @@ test_token = "MTA0NzEwNTM5ODQ1NDM3NDQ4MA.GtMN0U.VnQneacG6dWpKr4fM0f0s0tdujqQsJRk
 
 class Test(asynctest.TestCase):
     def test_init(self,opsdroid=None):
-        connector =asynctest.Mock(ConnectorDiscord({}, opsdroid))
+        connector =ConnectorDiscord({}, opsdroid)
         self.assertIsNone(connector.default_target)
         self.assertEqual(connector.name, "discord")
         self.assertEqual(connector.bot_name, "opsdroid")
         config = {"name":"toto",
                     "bot-name":"bot",
                     "token":test_token}
-        connector = asynctest.Mock(ConnectorDiscord(config,opsdroid))
+        connector = ConnectorDiscord(config,opsdroid)
         self.assertEqual(connector.name, "toto")
         self.assertEqual(connector.bot_name, "bot")
         self.assertEqual(connector.token,test_token)
     
     async def test_connect(self,opsdroid=None):
 
-        connector = asynctest.Mock(ConnectorDiscord({"token": test_token}, opsdroid))
-        connector.connect()
-        connector.client.start.assert_called()   
+        connector = ConnectorDiscord({"token": test_token}, opsdroid)
+        
+        await connector.connect()
+        connector.client.start.assert_called()
     async def test_discord_handle_message(self,opsdroid):
         """Test the new discord message handler."""
 
