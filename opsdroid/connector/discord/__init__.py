@@ -17,17 +17,33 @@ CONFIG_SCHEMA = {
 
 
 class ConnectorDiscord(Connector):
+    """A connector for Discord"""
     def __init__(self, config, opsdroid=None):
-        """Connector Setup."""
+        """Create the connector.
+        Args:
+            config (dict): configuration settings from the
+                file config.yaml.
+            opsdroid (OpsDroid): An instance of opsdroid.core.
+        """
         super().__init__(config, opsdroid=opsdroid)
         _LOGGER.debug("Starting Discord Connector.")
         self.name = config.get("name", "discord")
         self.bot_name = config.get("bot-name", "opsdroid")
         self.token = config.get("token")
-        self.client = DiscordClient(self.handle_message)
+        self.client = DiscordClient(self.handle_message, self.rename)
         self.bot_id = None
+    
+    async def rename(self):
+        """
+        Rename the bot if bot-name changed
+        """
+        if self.bot_name != self.client.user.name :
+            await self.client.user.edit(username=self.bot_name)
 
     async def handle_message(self, text, user, user_id, target, msg):
+        """
+        Handle messages received from discord gateway. All the arguments are provided by the 
+        """
         event = Message(
             text=text,
             user=user,
@@ -40,11 +56,13 @@ class ConnectorDiscord(Connector):
         await self.opsdroid.parse(event)
 
     async def connect(self):
+        """Connect to the discord gateway to get messages sent to the bot"""
         await self.client.start(self.token)
 
     async def listen(self):
         """Listen handled by webhooks."""
         pass
+
 
     @register_event(Message)
     async def send_message(self, message):
@@ -53,6 +71,7 @@ class ConnectorDiscord(Connector):
         await message.target.send(message.text)
 
     async def disconnect(self):
+        """Disconnect from the client (so the bot appears offline)"""
         _LOGGER.debug(_("Discord Client disconnecting"))
         self.client.close()
 
